@@ -1,0 +1,2 @@
+model_checkpoint_path: "gru_stock.ckpt"
+all_model_checkpoint_paths: "gru_stock.ckpt"
