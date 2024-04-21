@@ -8,7 +8,9 @@ get_data为爬虫文件
 预测贵州茅台股票（2018.01.02-2024.04.19后300天开盘价）
 
 各自文件夹中
-message.png为训练预测参数
+message.png为训练预测结果数据
+
 loss_compare为训练与验证的损失值
+
 stock_prediction_plot为预测值与真实值对比图
 
