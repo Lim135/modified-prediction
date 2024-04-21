@@ -27,30 +27,22 @@ test_set = pd.concat([maotai.iloc[1529 - 300:, 3:4],
                       # yutongkeji.iloc[1529 - 300:, 3:4]
                       ], axis=1).values # 后300天的开盘价作为测试集
 
-# 对开盘价进行归一化，使送入神经网络的数据分布在0-1之间
-sc = MinMaxScaler(feature_range=(0, 1))  # 定义归一化：归一化到(0，1)之间
-training_set_scaled = sc.fit_transform(training_set)  # 求得训练集的最大值、最小值这些训练集固有属性，并在训练集上进行归一化
-test_set_scaled = sc.transform(test_set)  # 利用训练集的属性对测试集进行归一化
 
-# 建立空列表，分别用于接收训练集输入特征、训练集标签、测试集输入特征、测试集标签
+sc = MinMaxScaler(feature_range=(0, 1))
+training_set_scaled = sc.fit_transform(training_set)
+test_set_scaled = sc.transform(test_set)
+
+
 x_train = []
 y_train = []
 x_test = []
 y_test = []
 
-# 训练集：csv表格中前2426-300=2126天数据
-# 提取训练集中连续60天的开盘价作为输入特征x_train，第61天的数据作为标签y_train
-# for循环共构建2426-300-60=2066组训练数据
-for i in range(60, len(training_set_scaled)):   # 利用for循环，遍历整个训练集
-    x_train.append(training_set_scaled[i - 60:i, :])  # 提取连续60天的所有特征作为输入特征
-    y_train.append(training_set_scaled[i, 0])  # 提取第61天的开盘价作为标签
 
-# # 对训练集进行打乱
-# np.random.seed(7)
-# np.random.shuffle(x_train)
-# np.random.seed(7)
-# np.random.shuffle(y_train)
-# tf.random.set_seed(7)
+for i in range(60, len(training_set_scaled)):
+    x_train.append(training_set_scaled[i - 60:i, :])
+    y_train.append(training_set_scaled[i, 0])
+
 
 # 合并 x_train 和 y_train
 combined_data = list(zip(x_train, y_train))
@@ -68,21 +60,14 @@ y_train = list(y_train_shuffled)
 # 将训练集由list格式变为array格式
 x_train, y_train = np.array(x_train), np.array(y_train)
 
-# 使x_train符合RNN输入要求：[送入样本数，循环核时间展开步数，每个时间步输入特征个数]
-# 此处整个数据集送入，送入样本数为x_train.shape[0]即2066组数据；
-# 输入60个开盘价，预测出第61天的开盘价，循环核时间展开步数为60；
-# 每个时间步送入的特征是某一天的所有特征，共有5个特征，故每个时间步输入特征个数为5
+
 x_train = np.reshape(x_train, (x_train.shape[0], 60, 1))
 
-# 测试集：csv表格中后300天数据
-# 提取测试集中连续60天的开盘价作为输入特征x_test，第61天的数据作为标签
-# for循环共构建300-60=240组数据
-for i in range(60, len(test_set_scaled)):   # 利用for循环，遍历整个测试集
-    x_test.append(test_set_scaled[i - 60:i, :])  # 提取连续60天的所有特征作为输入特征
-    y_test.append(test_set_scaled[i, 0])  # 提取第61天的开盘价作为标签
 
-# 测试集不需要打乱顺序
-# 测试集变array并reshape为符合RNN输入要求：[送入样本数，循环核时间展开步数，每个时间步输入特征个数]
+for i in range(60, len(test_set_scaled)):
+    x_test.append(test_set_scaled[i - 60:i, :])
+    y_test.append(test_set_scaled[i, 0])
+
 x_test, y_test = np.array(x_test), np.array(y_test)
 x_test = np.reshape(x_test, (x_test.shape[0], 60, 1))
 
@@ -91,14 +76,6 @@ x_test = np.reshape(x_test, (x_test.shape[0], 60, 1))
 
 
 ####################################################
-
-# tf.keras.layers.SimpleRNN(
-#     50
-#     # 循环核中记忆体的个数/神经元个数，
-#     # activation=tanh，   # 使用什么激活函数计算ht。若不写，默认用tanh
-#     # return_sequences=False #是否每个时刻输出ht到下一层   # True/False，默认False
-# )
-
 
 import tensorflow as tf
 # from keras.layers import , 
@@ -120,8 +97,7 @@ model = tf.keras.Sequential([
 # 配置训练方法
 model.compile(optimizer=tf.keras.optimizers.Adam(0.001),  # 学习率
               loss='mean_squared_error')  # 损失函数用均方误差
-# 该应用只观测loss数值，不观测准确率
-# metrics标注网络评测指标（各种accuracy），所以删去metrics选项，一会在每个epoch迭代显示时只显示loss值
+
 
 checkpoint_save_path = "./checkpoint_rnn/"
 
@@ -175,7 +151,7 @@ plt.plot(val_loss, label='Validation Loss')
 plt.title('Training and Validation Loss')
 plt.legend()
 plt.savefig('rnn_loss_compare.png')  # 保存图像为 PNG 格式
-
+plt.clf()
 ################## predict ######################
 # 测试集输入模型进行预测
 predicted_stock_price = model.predict(x_test)
@@ -185,8 +161,6 @@ predicted_stock_price = model.predict(x_test)
 min,scale = sc.min_,sc.scale_
 predicted_stock_price = (predicted_stock_price-min[0])/scale[0]
 
-# predicted_stock_price = sc.inverse_transform(predicted_stock_price)
-# 对真实数据还原---从（0，1）反归一化到原始范围
 
 # real_stock_price = sc.inverse_transform(test_set[60:])   # 240组测试数据
 real_stock_price = test_set[60:,0]
@@ -195,8 +169,8 @@ real_stock_price = test_set[60:,0]
 plt.plot(real_stock_price, color='red', label='MaoTai Stock Price')   # 真实值曲线
 plt.plot(predicted_stock_price, color='blue', label='Predicted MaoTai Stock Price')  # 预测值曲线
 plt.title('MaoTai Stock Price Prediction')
-plt.xlabel('Time')
-plt.ylabel('MaoTai Stock Price')
+plt.xlabel('Time(day)')
+plt.ylabel('MaoTai Stock Price(yuan)')
 plt.legend()
 plt.savefig('rnn_stock_prediction_plot.png')  # 保存图像为 PNG 格式
 

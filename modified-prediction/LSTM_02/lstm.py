@@ -89,7 +89,7 @@ x_test = np.reshape(x_test, (x_test.shape[0], 60, 5))
 
 
 import tensorflow as tf
-# from keras.layers import , 
+# from keras.layers import ,
 from tensorflow.keras.layers import Dropout,Dense,LSTM
 import matplotlib.pyplot as plt
 import os
@@ -168,7 +168,7 @@ plt.plot(val_loss, label='Validation Loss')
 plt.title('Training and Validation Loss')
 plt.legend()
 plt.savefig('LSTM_loss_compare.png')  # 保存图像为 PNG 格式
-
+plt.clf()
 ################## predict ######################
 # 测试集输入模型进行预测
 predicted_stock_price = model.predict(x_test)

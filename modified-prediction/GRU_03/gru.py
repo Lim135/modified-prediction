@@ -173,7 +173,7 @@ plt.plot(val_loss, label='Validation Loss')
 plt.title('Training and Validation Loss')
 plt.legend()
 plt.savefig('gru_loss_compare.png')  # 保存图像为 PNG 格式
-
+plt.clf()
 ################## predict ######################
 # 测试集输入模型进行预测
 predicted_stock_price = model.predict(x_test)
@@ -194,8 +194,8 @@ real_stock_price = test_set[60:,0]
 plt.plot(real_stock_price, color='red', label='MaoTai Stock Price')   # 真实值曲线
 plt.plot(predicted_stock_price, color='blue', label='Predicted MaoTai Stock Price')  # 预测值曲线
 plt.title('MaoTai Stock Price Prediction')
-plt.xlabel('Time')
-plt.ylabel('MaoTai Stock Price')
+plt.xlabel('Time(day)')
+plt.ylabel('MaoTai Stock Price(yuan)')
 plt.legend()
 plt.savefig('gru_stock_prediction_plot.png')  # 保存图像为 PNG 格式
 

@@ -170,7 +170,7 @@ plt.plot(val_loss, label='Validation Loss')
 plt.title('Training and Validation Loss')
 plt.legend()
 plt.savefig('LSTM_loss_compare1.png')  # 保存图像为 PNG 格式
-
+plt.clf()
 ################## predict ######################
 # 测试集输入模型进行预测
 predicted_stock_price = model.predict(x_test)
